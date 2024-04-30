@@ -76,21 +76,17 @@ WHERE special_features LIKE '%Behind the Scenes%';
 # Challenge 1 (SQL Data Aggregation and Transformation)
 -- You need to use SQL built-in functions to gain insights relating to the duration of movies:
 -- 1.1 Determine the shortest and longest movie durations and name the values as max_duration and min_duration.
-SELECT MAX(length) AS max_duration
+SELECT MAX(rental_duration) AS max_duration
 FROM film;
-SELECT MIN(length) AS min_duration
+SELECT MIN(rental_duration) AS min_duration
 FROM film;
 
 -- 1.2. Express the average movie duration in hours and minutes. Don't use decimals.
 SELECT 
-    CONCAT(
-        FLOOR(AVG(length) / 60), ' hours ',
-        ROUND(AVG(length) % 60), ' minutes'
-    ) AS average_duration
+    FLOOR(AVG(length) / 60) AS hours,
+    ROUND(AVG(length) % 60) AS minutes
 FROM 
     film;
-
-
 
 #2 You need to gain insights related to rental dates:
 -- 2.1 Calculate the number of days that the company has been operating.
@@ -101,8 +97,8 @@ FROM rental;
 -- 2.2 Retrieve rental information and add two additional columns to show the month and weekday of the rental. Return 20 rows 
 -- of results.
 SELECT *,
-    MONTH(rental_date) AS rental_month,
-    DAYNAME(rental_date) AS rental_weekday
+    DATE_FORMAT(rental_date, '%M') AS rental_month,
+    DATE_FORMAT(rental_date, '%W') AS rental_weekday
 FROM rental
 LIMIT 20;
 
@@ -110,11 +106,11 @@ LIMIT 20;
 -- depending on the day of the week.
 SELECT *,
     CASE 
-        WHEN DAYOFWEEK(rental_date) IN (1, 7) THEN 'weekend'
+        WHEN DATE_FORMAT(rental_date, '%w') IN (0, 6) THEN 'weekend'
         ELSE 'workday'
     END AS DAY_TYPE
-FROM 
-    rental;
+FROM rental;
+
 
 #3 Retrieve the film titles and their rental duration. If any rental duration value is NULL, replace it with the string 
 -- 'Not Available'. Sort the results of the film title in ascending order.
@@ -122,10 +118,10 @@ SELECT
     title,
     IFNULL(rental_duration, 'Not Available') AS rental_duration
 FROM film
-ORDER BY rental_duration ASC;
+ORDER BY title ASC;
 
 
-# Bonus: The marketing team for the movie rental company now needs to create a personalized email campaign for customers. 
+#4 Bonus: The marketing team for the movie rental company now needs to create a personalized email campaign for customers. 
 -- To achieve this, you need to retrieve the concatenated first and last names of customers, along with the first 3 characters
 -- of their email address, so that you can address them by their first name and use their email address to send personalized 
 -- recommendations. The results should be ordered by last name in ascending order to make it easier to use the data.
@@ -154,7 +150,7 @@ FROM film
 GROUP BY rating
 ORDER BY number_of_films DESC;
 
-# Using the film table, determine:
+#2 Using the film table, determine:
 -- 2.1 The mean film duration for each rating, and sort the results in descending order of the mean duration. Round off the 
 -- average lengths to two decimal places.
 SELECT rating, 
@@ -172,3 +168,9 @@ GROUP BY rating
 HAVING mean_duration > 120
 ORDER BY mean_duration DESC;
 
+#3 Bonus: determine which last names are not repeated in the table actor.
+
+SELECT last_name
+FROM actor
+GROUP BY last_name
+HAVING COUNT(*) = 1;
